@@ -2,6 +2,9 @@ package com.harika.inventorymanagementsystem.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 
 import java.math.BigDecimal;
 
@@ -12,6 +15,34 @@ public class SalesItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "sales_invoice_id")
+    private SalesInvoice salesInvoice;
+
+    @ManyToOne
+    @JoinColumn(name = "product_id")
+    private Product product;
+
+    // Number of units sold.
+    @NotNull
+    @Positive
+    private Integer quantity;
+
+    // Selling price before customer discount.
+    @NotNull
+    @Positive
+    private BigDecimal sellingPrice;
+
+    // Discount given for this particular sale.
+    // This is editable during billing.
+    @NotNull
+    @PositiveOrZero
+    private BigDecimal discount;
+
+    // Final price after discount.
+    private BigDecimal finalPrice;
 
     public SalesInvoice getSalesInvoice() {
         return salesInvoice;
@@ -68,31 +99,4 @@ public class SalesItem {
     public void setFinalPrice(BigDecimal finalPrice) {
         this.finalPrice = finalPrice;
     }
-
-    // Prevent circular JSON:
-    // SalesInvoice → SalesItems → SalesInvoice → ...
-    @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name = "sales_invoice_id")
-    private SalesInvoice salesInvoice;
-
-    // The Product being sold.
-    @ManyToOne
-    @JoinColumn(name = "product_id")
-    private Product product;
-
-    // Number of units sold.
-    private Integer quantity;
-
-    // Selling price before customer discount.
-    private BigDecimal sellingPrice;
-
-    // Discount given for this particular sale.
-    // This is editable during billing.
-    private BigDecimal discount;
-
-    // Final price after discount.
-    private BigDecimal finalPrice;
-
-    // Generate getters and setters using IntelliJ.
 }

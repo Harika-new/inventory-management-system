@@ -2,6 +2,7 @@ package com.harika.inventorymanagementsystem.service;
 
 import com.harika.inventorymanagementsystem.entity.SalesInvoice;
 import com.harika.inventorymanagementsystem.entity.SalesItem;
+import com.harika.inventorymanagementsystem.exception.InvalidDiscountException;
 import com.harika.inventorymanagementsystem.repository.SalesInvoiceRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +43,14 @@ public class SalesInvoiceService {
             // Connect this SalesItem to its parent SalesInvoice.
             // SalesItem owns the sales_invoice_id foreign key.
             item.setSalesInvoice(salesInvoice);
+
+            // Business rule:
+            // Discount cannot be greater than selling price.
+            if (item.getDiscount().compareTo(item.getSellingPrice()) >= 0) {
+                throw new InvalidDiscountException(
+                        "Discount must be less than selling price"
+                );
+            }
 
             // Calculate final price after discount.
             //

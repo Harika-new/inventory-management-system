@@ -1,6 +1,7 @@
 package com.harika.inventorymanagementsystem.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -75,6 +76,7 @@ public class SalesInvoice {
     private Customer customer;
 
     // One SalesInvoice can contain many SalesItems.
+    @Valid
     @OneToMany(mappedBy = "salesInvoice", cascade = CascadeType.ALL)
     private List<SalesItem> salesItems;
 

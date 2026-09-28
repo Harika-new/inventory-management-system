@@ -2,6 +2,7 @@ package com.harika.inventorymanagementsystem.controller;
 
 import com.harika.inventorymanagementsystem.entity.SalesInvoice;
 import com.harika.inventorymanagementsystem.service.SalesInvoiceService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,7 +25,7 @@ public class SalesInvoiceController {
     // Create Sales Invoice
     @PostMapping
     public SalesInvoice createSalesInvoice(
-            @RequestBody SalesInvoice salesInvoice) {
+            @Valid @RequestBody SalesInvoice salesInvoice) {
 
         return salesInvoiceService.saveSalesInvoice(salesInvoice);
     }
