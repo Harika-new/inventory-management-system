@@ -42,4 +42,13 @@ public class GlobalExceptionHandler {
                 .badRequest()
                 .body(new ErrorResponse(e.getMessage()));
     }
+
+    @ExceptionHandler(InvalidPaymentException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidPayment(
+            InvalidPaymentException e) {
+
+        return ResponseEntity
+                .badRequest()
+                .body(new ErrorResponse(e.getMessage()));
+    }
 }
