@@ -71,12 +71,24 @@ public class SupplierPaymentService {
         Long purchaseInvoiceId =
                 supplierPayment.getPurchaseInvoice().getId();
 
+        // Business rule:
+        // Payment amount must be greater than zero.
+        if (supplierPayment.getAmount()
+                .compareTo(BigDecimal.ZERO) <= 0) {
+
+            throw new InvalidPaymentException(
+                    "Payment amount must be greater than zero"
+            );
+        }
+
         BigDecimal pendingAmount =
                 getPendingAmount(purchaseInvoiceId);
 
         // Business rule:
         // Payment cannot be greater than pending amount.
-        if (supplierPayment.getAmount().compareTo(pendingAmount) > 0) {
+        if (supplierPayment.getAmount()
+                .compareTo(pendingAmount) > 0) {
+
             throw new InvalidPaymentException(
                     "Payment cannot be greater than pending amount"
             );

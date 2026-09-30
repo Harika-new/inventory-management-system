@@ -25,10 +25,14 @@ public class SalesPaymentService {
         this.salesInvoiceRepository = salesInvoiceRepository;
     }
 
-    public BigDecimal getTotalPaidForSalesInvoice(Long salesInvoiceId) {
+    // Calculate total amount already paid
+    // for a particular Sales Invoice.
+    public BigDecimal getTotalPaidForSalesInvoice(
+            Long salesInvoiceId) {
 
         List<SalesPayment> payments =
-                salesPaymentRepository.findBySalesInvoiceId(salesInvoiceId);
+                salesPaymentRepository
+                        .findBySalesInvoiceId(salesInvoiceId);
 
         BigDecimal totalPaid = BigDecimal.ZERO;
 
@@ -39,29 +43,51 @@ public class SalesPaymentService {
         return totalPaid;
     }
 
+    // Calculate pending amount for a Sales Invoice.
+    //
+    // Pending Amount =
+    // Sales Invoice Total - Total Payments
     public BigDecimal getPendingAmount(Long salesInvoiceId) {
 
         SalesInvoice salesInvoice =
-                salesInvoiceRepository.findById(salesInvoiceId)
+                salesInvoiceRepository
+                        .findById(salesInvoiceId)
                         .orElseThrow(() ->
-                                new RuntimeException("Sales Invoice not found"));
+                                new RuntimeException(
+                                        "Sales Invoice not found"
+                                ));
 
         BigDecimal totalPaid =
                 getTotalPaidForSalesInvoice(salesInvoiceId);
 
-        return salesInvoice.getTotalAmount().subtract(totalPaid);
+        return salesInvoice.getTotalAmount()
+                .subtract(totalPaid);
     }
 
+    // Save Sales Payment
     public SalesPayment saveSalesPayment(
             SalesPayment salesPayment) {
 
         Long salesInvoiceId =
                 salesPayment.getSalesInvoice().getId();
 
+        // Business rule:
+        // Payment amount must be greater than zero.
+        if (salesPayment.getAmount()
+                .compareTo(BigDecimal.ZERO) <= 0) {
+
+            throw new InvalidPaymentException(
+                    "Payment amount must be greater than zero"
+            );
+        }
+
         BigDecimal pendingAmount =
                 getPendingAmount(salesInvoiceId);
 
-        if (salesPayment.getAmount().compareTo(pendingAmount) > 0) {
+        // Business rule:
+        // Payment cannot be greater than pending amount.
+        if (salesPayment.getAmount()
+                .compareTo(pendingAmount) > 0) {
 
             throw new InvalidPaymentException(
                     "Payment cannot be greater than pending amount"
@@ -71,15 +97,22 @@ public class SalesPaymentService {
         return salesPaymentRepository.save(salesPayment);
     }
 
+    // Get all Sales Payments
     public List<SalesPayment> getAllSalesPayments() {
+
         return salesPaymentRepository.findAll();
     }
 
-    public Optional<SalesPayment> getSalesPaymentById(Long id) {
+    // Get Sales Payment by ID
+    public Optional<SalesPayment> getSalesPaymentById(
+            Long id) {
+
         return salesPaymentRepository.findById(id);
     }
 
+    // Delete Sales Payment by ID
     public void deleteSalesPayment(Long id) {
+
         salesPaymentRepository.deleteById(id);
     }
 }
