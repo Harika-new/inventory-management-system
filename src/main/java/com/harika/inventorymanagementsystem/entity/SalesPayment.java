@@ -1,6 +1,7 @@
 package com.harika.inventorymanagementsystem.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -13,8 +14,9 @@ public class SalesPayment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "sales_invoice_id")
+    @NotNull(message = "Sales invoice is required")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "sales_invoice_id", nullable = false)
     private SalesInvoice salesInvoice;
 
     private BigDecimal amount;

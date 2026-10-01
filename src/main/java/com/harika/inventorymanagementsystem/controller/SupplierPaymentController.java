@@ -2,6 +2,7 @@ package com.harika.inventorymanagementsystem.controller;
 
 import com.harika.inventorymanagementsystem.entity.SupplierPayment;
 import com.harika.inventorymanagementsystem.service.SupplierPaymentService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -23,7 +24,7 @@ public class SupplierPaymentController {
     // Create Supplier Payment
     @PostMapping
     public SupplierPayment createSupplierPayment(
-            @RequestBody SupplierPayment supplierPayment) {
+            @RequestBody @Valid SupplierPayment supplierPayment) {
 
         return supplierPaymentService.saveSupplierPayment(
                 supplierPayment

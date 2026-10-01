@@ -3,6 +3,7 @@ package com.harika.inventorymanagementsystem.service;
 import com.harika.inventorymanagementsystem.entity.PurchaseInvoice;
 import com.harika.inventorymanagementsystem.entity.SupplierPayment;
 import com.harika.inventorymanagementsystem.exception.InvalidPaymentException;
+import com.harika.inventorymanagementsystem.exception.PurchaseInvoiceNotFoundException;
 import com.harika.inventorymanagementsystem.repository.PurchaseInvoiceRepository;
 import com.harika.inventorymanagementsystem.repository.SupplierPaymentRepository;
 import org.springframework.stereotype.Service;
@@ -53,7 +54,7 @@ public class SupplierPaymentService {
                 purchaseInvoiceRepository
                         .findById(purchaseInvoiceId)
                         .orElseThrow(() ->
-                                new RuntimeException(
+                                new PurchaseInvoiceNotFoundException(
                                         "Purchase Invoice not found"
                                 ));
 

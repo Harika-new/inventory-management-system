@@ -2,6 +2,7 @@ package com.harika.inventorymanagementsystem.controller;
 
 import com.harika.inventorymanagementsystem.entity.SalesPayment;
 import com.harika.inventorymanagementsystem.service.SalesPaymentService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -21,7 +22,7 @@ public class SalesPaymentController {
 
     @PostMapping
     public SalesPayment createSalesPayment(
-            @RequestBody SalesPayment salesPayment) {
+            @RequestBody @Valid SalesPayment salesPayment) {
 
         return salesPaymentService.saveSalesPayment(salesPayment);
     }

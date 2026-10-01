@@ -17,21 +17,13 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(e.getMessage()));
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationError(
-            MethodArgumentNotValidException e) {
-
-        String field = e.getBindingResult()
-                .getFieldError()
-                .getField();
-
-        String message = e.getBindingResult()
-                .getFieldError()
-                .getDefaultMessage();
+    @ExceptionHandler(InvalidPaymentException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidPayment(
+            InvalidPaymentException e) {
 
         return ResponseEntity
                 .badRequest()
-                .body(new ErrorResponse(field + ": " + message));
+                .body(new ErrorResponse(e.getMessage()));
     }
 
     @ExceptionHandler(InvalidDiscountException.class)
@@ -43,9 +35,36 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(e.getMessage()));
     }
 
-    @ExceptionHandler(InvalidPaymentException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidPayment(
-            InvalidPaymentException e) {
+    @ExceptionHandler(PurchaseInvoiceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handlePurchaseInvoiceNotFound(
+            PurchaseInvoiceNotFoundException e) {
+
+        return ResponseEntity
+                .badRequest()
+                .body(new ErrorResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidationError(
+            MethodArgumentNotValidException e) {
+
+        String field =
+                e.getBindingResult()
+                        .getFieldError()
+                        .getField();
+
+        String message =
+                e.getBindingResult()
+                        .getFieldError()
+                        .getDefaultMessage();
+
+        return ResponseEntity
+                .badRequest()
+                .body(new ErrorResponse(field + ": " + message));
+    }
+    @ExceptionHandler(SalesInvoiceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleSalesInvoiceNotFound(
+            SalesInvoiceNotFoundException e) {
 
         return ResponseEntity
                 .badRequest()
