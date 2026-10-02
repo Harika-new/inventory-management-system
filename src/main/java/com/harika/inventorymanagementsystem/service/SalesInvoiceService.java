@@ -1,5 +1,7 @@
 package com.harika.inventorymanagementsystem.service;
 
+import com.harika.inventorymanagementsystem.dto.CustomerOutstandingResponse;
+import com.harika.inventorymanagementsystem.dto.SalesSummaryResponse;
 import com.harika.inventorymanagementsystem.entity.SalesInvoice;
 import com.harika.inventorymanagementsystem.entity.SalesItem;
 import com.harika.inventorymanagementsystem.exception.InvalidDiscountException;
@@ -45,7 +47,7 @@ public class SalesInvoiceService {
             item.setSalesInvoice(salesInvoice);
 
             // Business rule:
-            // Discount cannot be greater than selling price.
+            // Discount cannot be greater than or equal to selling price.
             if (item.getDiscount().compareTo(item.getSellingPrice()) >= 0) {
                 throw new InvalidDiscountException(
                         "Discount must be less than selling price"
@@ -53,11 +55,6 @@ public class SalesInvoiceService {
             }
 
             // Calculate final price after discount.
-            //
-            // Example:
-            // Selling Price = ₹1,000
-            // Discount      = ₹400
-            // Final Price   = ₹600
             BigDecimal finalPrice =
                     item.getSellingPrice()
                             .subtract(item.getDiscount());
@@ -65,9 +62,7 @@ public class SalesInvoiceService {
             // Store the calculated final price.
             item.setFinalPrice(finalPrice);
 
-            // Calculate this item's total:
-            //
-            // Final Price × Quantity
+            // Calculate this item's total.
             BigDecimal itemTotal =
                     finalPrice.multiply(
                             BigDecimal.valueOf(item.getQuantity())
@@ -104,5 +99,15 @@ public class SalesInvoiceService {
     // Delete Sales Invoice by ID
     public void deleteSalesInvoice(Long id) {
         salesInvoiceRepository.deleteById(id);
+    }
+
+    // Get customer-wise outstanding amount.
+    public List<CustomerOutstandingResponse> getCustomerOutstanding() {
+        return salesInvoiceRepository.getCustomerOutstanding();
+    }
+
+    // Get sales dashboard summary.
+    public SalesSummaryResponse getSalesSummary() {
+        return salesInvoiceRepository.getSalesSummary();
     }
 }

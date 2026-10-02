@@ -9,6 +9,7 @@ import com.harika.inventorymanagementsystem.repository.SalesPaymentRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -79,6 +80,16 @@ public class SalesPaymentService {
 
             throw new InvalidPaymentException(
                     "Payment amount must be greater than zero"
+            );
+        }
+
+        // Business rule:
+        // Payment date cannot be in the future.
+        if (salesPayment.getPaymentDate()
+                .isAfter(LocalDate.now())) {
+
+            throw new InvalidPaymentException(
+                    "Payment date cannot be in the future"
             );
         }
 

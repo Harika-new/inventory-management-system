@@ -1,5 +1,7 @@
 package com.harika.inventorymanagementsystem.controller;
 
+import com.harika.inventorymanagementsystem.dto.CustomerOutstandingResponse;
+import com.harika.inventorymanagementsystem.dto.SalesSummaryResponse;
 import com.harika.inventorymanagementsystem.entity.SalesInvoice;
 import com.harika.inventorymanagementsystem.service.SalesInvoiceService;
 import jakarta.validation.Valid;
@@ -34,6 +36,18 @@ public class SalesInvoiceController {
     @GetMapping
     public List<SalesInvoice> getAllSalesInvoices() {
         return salesInvoiceService.getAllSalesInvoices();
+    }
+
+    // Get customer-wise outstanding amount
+    @GetMapping("/customer-outstanding")
+    public List<CustomerOutstandingResponse> getCustomerOutstanding() {
+        return salesInvoiceService.getCustomerOutstanding();
+    }
+
+    // Get sales dashboard summary
+    @GetMapping("/sales-summary")
+    public SalesSummaryResponse getSalesSummary() {
+        return salesInvoiceService.getSalesSummary();
     }
 
     // Get Sales Invoice by ID

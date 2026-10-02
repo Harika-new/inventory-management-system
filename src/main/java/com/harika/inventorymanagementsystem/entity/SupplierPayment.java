@@ -53,7 +53,7 @@ public class SupplierPayment {
 
     private BigDecimal amount;
 
+    @NotNull(message = "Payment date is required")
     private LocalDate paymentDate;
-
     // Getters and Setters
 }

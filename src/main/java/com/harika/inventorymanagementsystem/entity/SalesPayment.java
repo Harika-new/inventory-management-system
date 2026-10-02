@@ -21,6 +21,7 @@ public class SalesPayment {
 
     private BigDecimal amount;
 
+    @NotNull(message = "Payment date is required")
     private LocalDate paymentDate;
 
     public Long getId() {

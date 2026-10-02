@@ -1,5 +1,6 @@
 package com.harika.inventorymanagementsystem.service;
 
+import com.harika.inventorymanagementsystem.dto.InventorySummaryResponse;
 import com.harika.inventorymanagementsystem.entity.Product;
 import com.harika.inventorymanagementsystem.entity.Stock;
 import com.harika.inventorymanagementsystem.exception.InsufficientStockException;
@@ -97,6 +98,8 @@ public class StockService {
                 .orElseThrow(
                         () -> new RuntimeException("Stock not found")
                 );
+
+        // Check whether enough stock is available.
         if (stock.getQuantity() < soldQuantity) {
             throw new InsufficientStockException(
                     "Insufficient stock. Available: "
@@ -113,5 +116,10 @@ public class StockService {
 
         // Save and return updated Stock.
         return stockRepository.save(stock);
+    }
+
+    // Get category-wise and size-wise inventory summary.
+    public List<InventorySummaryResponse> getInventorySummary() {
+        return stockRepository.getInventorySummary();
     }
 }

@@ -1,5 +1,7 @@
 package com.harika.inventorymanagementsystem.service;
 
+import com.harika.inventorymanagementsystem.dto.PurchaseSummaryResponse;
+import com.harika.inventorymanagementsystem.dto.SupplierOutstandingResponse;
 import com.harika.inventorymanagementsystem.entity.PurchaseInvoice;
 import com.harika.inventorymanagementsystem.entity.PurchaseItem;
 import com.harika.inventorymanagementsystem.repository.PurchaseInvoiceRepository;
@@ -48,18 +50,10 @@ public class PurchaseInvoiceService {
                             .multiply(BigDecimal.valueOf(item.getQuantity()));
 
             // Add the current item's amount to the invoice total.
-            // Example:
-            // Item 1 = ₹3,000 → total = ₹3,000
-            // Item 2 = ₹2,500 → total = ₹5,500
             total = total.add(itemAmount);
 
             // Increase Stock using only the quantity actually received
             // and accepted by the shop.
-            //
-            // Example:
-            // Invoice quantity = 10
-            // Received quantity = 8
-            // Stock increases by 8, not 10.
             stockService.increaseStock(
                     item.getProduct().getId(),
                     item.getReceivedQuantity()
@@ -72,6 +66,16 @@ public class PurchaseInvoiceService {
         // Save the invoice.
         // Cascade will also save its PurchaseItems.
         return purchaseInvoiceRepository.save(purchaseInvoice);
+    }
+
+    // Get supplier-wise outstanding amount.
+    public List<SupplierOutstandingResponse> getSupplierOutstanding() {
+        return purchaseInvoiceRepository.getSupplierOutstanding();
+    }
+
+    // Get purchase dashboard summary.
+    public PurchaseSummaryResponse getPurchaseSummary() {
+        return purchaseInvoiceRepository.getPurchaseSummary();
     }
 
     // Get all Purchase Invoices

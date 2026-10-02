@@ -1,5 +1,6 @@
 package com.harika.inventorymanagementsystem.controller;
 
+import com.harika.inventorymanagementsystem.dto.InventorySummaryResponse;
 import com.harika.inventorymanagementsystem.entity.Stock;
 import com.harika.inventorymanagementsystem.service.StockService;
 import org.springframework.web.bind.annotation.*;
@@ -45,5 +46,12 @@ public class StockController {
     @DeleteMapping("/{id}")
     public void deleteStock(@PathVariable Long id) {
         stockService.deleteStock(id);
+    }
+
+    // GET /stocks/inventory-summary
+    // Returns category-wise and size-wise total available stock.
+    @GetMapping("/inventory-summary")
+    public List<InventorySummaryResponse> getInventorySummary() {
+        return stockService.getInventorySummary();
     }
 }
