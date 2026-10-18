@@ -1,11 +1,12 @@
+
 package com.harika.inventorymanagementsystem.repository;
 
-import com.harika.inventorymanagementsystem.dto.PurchaseSummaryResponse;
 import com.harika.inventorymanagementsystem.dto.SupplierOutstandingResponse;
 import com.harika.inventorymanagementsystem.entity.PurchaseInvoice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface PurchaseInvoiceRepository
@@ -30,14 +31,18 @@ public interface PurchaseInvoiceRepository
         """)
     List<SupplierOutstandingResponse> getSupplierOutstanding();
 
+    @Query("SELECT COUNT(pi.id) FROM PurchaseInvoice pi")
+    Long getTotalPurchaseInvoiceCount();
+
     @Query("""
-        SELECT new com.harika.inventorymanagementsystem.dto.PurchaseSummaryResponse(
-            COUNT(DISTINCT pi.id),
-            SUM(item.quantity),
-            SUM(pi.totalAmount)
-        )
+        SELECT COALESCE(SUM(pi.totalAmount), 0)
         FROM PurchaseInvoice pi
-        JOIN pi.purchaseItems item
         """)
-    PurchaseSummaryResponse getPurchaseSummary();
+    BigDecimal getTotalPurchaseInvoiceAmount();
+
+    @Query("""
+        SELECT COALESCE(SUM(item.quantity), 0)
+        FROM PurchaseItem item
+        """)
+    Long getTotalUnitsPurchased();
 }

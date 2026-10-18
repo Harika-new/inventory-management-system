@@ -1,3 +1,4 @@
+
 package com.harika.inventorymanagementsystem.service;
 
 import com.harika.inventorymanagementsystem.dto.InventorySummaryResponse;
@@ -17,12 +18,9 @@ public class StockService {
     private final StockRepository stockRepository;
     private final ProductRepository productRepository;
 
-    // Constructor injection:
-    // Spring creates both repositories and injects them here.
     public StockService(
             StockRepository stockRepository,
             ProductRepository productRepository) {
-
         this.stockRepository = stockRepository;
         this.productRepository = productRepository;
     }
@@ -50,56 +48,75 @@ public class StockService {
     // Increase available stock when products are received.
     public Stock increaseStock(Long productId, Integer receivedQuantity) {
 
-        // Check whether Stock already exists for this Product.
+        if (productId == null || productId <= 0) {
+            throw new IllegalArgumentException(
+                    "Product ID must be greater than zero"
+            );
+        }
+
+        if (receivedQuantity == null || receivedQuantity <= 0) {
+            throw new IllegalArgumentException(
+                    "Received quantity must be greater than zero"
+            );
+        }
+
         Optional<Stock> existingStock =
                 stockRepository.findByProductId(productId);
 
         if (existingStock.isPresent()) {
-
-            // Existing Stock record found.
             Stock stock = existingStock.get();
 
-            // Add newly received quantity to current stock.
+            if (stock.getQuantity() == null || stock.getQuantity() < 0) {
+                throw new IllegalStateException(
+                        "Stock quantity is invalid"
+                );
+            }
+
             stock.setQuantity(
                     stock.getQuantity() + receivedQuantity
             );
 
-            // Save updated Stock.
             return stockRepository.save(stock);
-
-        } else {
-
-            // No Stock record exists.
-            // This is the first purchase of this Product.
-            Stock newStock = new Stock();
-
-            // Find the Product using its ID.
-            Product product = productRepository.findById(productId)
-                    .orElseThrow(
-                            () -> new RuntimeException("Product not found")
-                    );
-
-            // Connect Stock to Product.
-            newStock.setProduct(product);
-
-            // Set initial Stock quantity.
-            newStock.setQuantity(receivedQuantity);
-
-            // Save new Stock record.
-            return stockRepository.save(newStock);
         }
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(
+                        () -> new RuntimeException("Product not found")
+                );
+
+        Stock newStock = new Stock();
+        newStock.setProduct(product);
+        newStock.setQuantity(receivedQuantity);
+
+        return stockRepository.save(newStock);
     }
 
     // Decrease available stock when a product is sold.
     public Stock decreaseStock(Long productId, Integer soldQuantity) {
 
-        // Find the existing Stock record for this Product.
+        if (productId == null || productId <= 0) {
+            throw new IllegalArgumentException(
+                    "Product ID must be greater than zero"
+            );
+        }
+
+        if (soldQuantity == null || soldQuantity <= 0) {
+            throw new IllegalArgumentException(
+                    "Sold quantity must be greater than zero"
+            );
+        }
+
         Stock stock = stockRepository.findByProductId(productId)
                 .orElseThrow(
                         () -> new RuntimeException("Stock not found")
                 );
 
-        // Check whether enough stock is available.
+        if (stock.getQuantity() == null || stock.getQuantity() < 0) {
+            throw new IllegalStateException(
+                    "Stock quantity is invalid"
+            );
+        }
+
         if (stock.getQuantity() < soldQuantity) {
             throw new InsufficientStockException(
                     "Insufficient stock. Available: "
@@ -109,12 +126,10 @@ public class StockService {
             );
         }
 
-        // Reduce available stock.
         stock.setQuantity(
                 stock.getQuantity() - soldQuantity
         );
 
-        // Save and return updated Stock.
         return stockRepository.save(stock);
     }
 

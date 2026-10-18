@@ -1,3 +1,4 @@
+
 package com.harika.inventorymanagementsystem.service;
 
 import com.harika.inventorymanagementsystem.dto.PurchaseSummaryResponse;
@@ -6,6 +7,7 @@ import com.harika.inventorymanagementsystem.entity.PurchaseInvoice;
 import com.harika.inventorymanagementsystem.entity.PurchaseItem;
 import com.harika.inventorymanagementsystem.repository.PurchaseInvoiceRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -17,54 +19,84 @@ public class PurchaseInvoiceService {
     private final PurchaseInvoiceRepository purchaseInvoiceRepository;
     private final StockService stockService;
 
-    // Constructor injection:
-    // Spring creates both dependencies and injects them here.
     public PurchaseInvoiceService(
             PurchaseInvoiceRepository purchaseInvoiceRepository,
             StockService stockService) {
-
         this.purchaseInvoiceRepository = purchaseInvoiceRepository;
         this.stockService = stockService;
     }
 
     // Save Purchase Invoice
-    public PurchaseInvoice savePurchaseInvoice(PurchaseInvoice purchaseInvoice) {
+    @Transactional
+    public PurchaseInvoice savePurchaseInvoice(
+            PurchaseInvoice purchaseInvoice) {
 
-        // Connect each PurchaseItem to its parent PurchaseInvoice.
-        // PurchaseItem owns the purchase_invoice_id foreign key.
-        for (PurchaseItem item : purchaseInvoice.getPurchaseItems()) {
-            item.setPurchaseInvoice(purchaseInvoice);
-        }
-
-        // Start invoice total from ₹0.
-        BigDecimal total = BigDecimal.ZERO;
-
-        // Get all PurchaseItems belonging to this invoice
-        // and process each item one by one.
-        for (PurchaseItem item : purchaseInvoice.getPurchaseItems()) {
-
-            // Calculate this item's amount:
-            // quantity × purchase price
-            BigDecimal itemAmount =
-                    item.getPurchasePrice()
-                            .multiply(BigDecimal.valueOf(item.getQuantity()));
-
-            // Add the current item's amount to the invoice total.
-            total = total.add(itemAmount);
-
-            // Increase Stock using only the quantity actually received
-            // and accepted by the shop.
-            stockService.increaseStock(
-                    item.getProduct().getId(),
-                    item.getReceivedQuantity()
+        if (purchaseInvoice == null
+                || purchaseInvoice.getPurchaseItems() == null
+                || purchaseInvoice.getPurchaseItems().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Purchase invoice must contain at least one item"
             );
         }
 
-        // Put the calculated total into the PurchaseInvoice object.
+        // Validate all items before updating stock.
+        for (PurchaseItem item : purchaseInvoice.getPurchaseItems()) {
+            if (item == null
+                    || item.getProduct() == null
+                    || item.getProduct().getId() == null) {
+                throw new IllegalArgumentException(
+                        "Each purchase item must have a valid product"
+                );
+            }
+
+            if (item.getQuantity() == null || item.getQuantity() <= 0) {
+                throw new IllegalArgumentException(
+                        "Ordered quantity must be greater than zero"
+                );
+            }
+
+            if (item.getPurchasePrice() == null
+                    || item.getPurchasePrice().compareTo(BigDecimal.ZERO) < 0) {
+                throw new IllegalArgumentException(
+                        "Purchase price cannot be null or negative"
+                );
+            }
+
+            if (item.getReceivedQuantity() == null
+                    || item.getReceivedQuantity() < 0) {
+                throw new IllegalArgumentException(
+                        "Received quantity cannot be null or negative"
+                );
+            }
+
+            if (item.getReceivedQuantity() > item.getQuantity()) {
+                throw new IllegalArgumentException(
+                        "Received quantity cannot exceed ordered quantity"
+                );
+            }
+        }
+
+        BigDecimal total = BigDecimal.ZERO;
+
+        for (PurchaseItem item : purchaseInvoice.getPurchaseItems()) {
+            item.setPurchaseInvoice(purchaseInvoice);
+
+            BigDecimal itemAmount = item.getPurchasePrice()
+                    .multiply(BigDecimal.valueOf(item.getQuantity()));
+
+            total = total.add(itemAmount);
+
+            // Increase stock only for pieces actually received.
+            if (item.getReceivedQuantity() > 0) {
+                stockService.increaseStock(
+                        item.getProduct().getId(),
+                        item.getReceivedQuantity()
+                );
+            }
+        }
+
         purchaseInvoice.setTotalAmount(total);
 
-        // Save the invoice.
-        // Cascade will also save its PurchaseItems.
         return purchaseInvoiceRepository.save(purchaseInvoice);
     }
 
@@ -75,20 +107,33 @@ public class PurchaseInvoiceService {
 
     // Get purchase dashboard summary.
     public PurchaseSummaryResponse getPurchaseSummary() {
-        return purchaseInvoiceRepository.getPurchaseSummary();
+        Long totalInvoices =
+                purchaseInvoiceRepository.getTotalPurchaseInvoiceCount();
+
+        BigDecimal totalPurchaseAmount =
+                purchaseInvoiceRepository.getTotalPurchaseInvoiceAmount();
+
+        Long totalUnitsPurchased =
+                purchaseInvoiceRepository.getTotalUnitsPurchased();
+
+        return new PurchaseSummaryResponse(
+                totalInvoices,
+                totalUnitsPurchased,
+                totalPurchaseAmount
+        );
     }
 
-    // Get all Purchase Invoices
+    // Get all Purchase Invoices.
     public List<PurchaseInvoice> getAllPurchaseInvoices() {
         return purchaseInvoiceRepository.findAll();
     }
 
-    // Get one Purchase Invoice by ID
+    // Get one Purchase Invoice by ID.
     public Optional<PurchaseInvoice> getPurchaseInvoiceById(Long id) {
         return purchaseInvoiceRepository.findById(id);
     }
 
-    // Delete Purchase Invoice by ID
+    // Delete Purchase Invoice by ID.
     public void deletePurchaseInvoice(Long id) {
         purchaseInvoiceRepository.deleteById(id);
     }
