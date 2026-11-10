@@ -1,11 +1,13 @@
+
 package com.harika.inventorymanagementsystem.repository;
 
 import com.harika.inventorymanagementsystem.dto.CustomerOutstandingResponse;
-import com.harika.inventorymanagementsystem.dto.SalesSummaryResponse;
 import com.harika.inventorymanagementsystem.entity.SalesInvoice;
+import com.harika.inventorymanagementsystem.dto.SalesSummaryResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface SalesInvoiceRepository
@@ -30,14 +32,28 @@ public interface SalesInvoiceRepository
         """)
     List<CustomerOutstandingResponse> getCustomerOutstanding();
 
+
+    // Total number of sales invoices.
     @Query("""
-        SELECT new com.harika.inventorymanagementsystem.dto.SalesSummaryResponse(
-            COUNT(DISTINCT si.id),
-            SUM(item.quantity),
-            SUM(si.totalAmount)
-        )
+        SELECT COUNT(si.id)
         FROM SalesInvoice si
-        JOIN si.salesItems item
         """)
-    SalesSummaryResponse getSalesSummary();
+    Long countTotalBills();
+
+
+    // Total quantity of products sold.
+    @Query("""
+        SELECT COALESCE(SUM(item.quantity), 0)
+        FROM SalesItem item
+        """)
+    Long getTotalUnitsSold();
+
+
+    // Total sales amount.
+    // Each invoice is counted only once.
+    @Query("""
+        SELECT COALESCE(SUM(si.totalAmount), 0)
+        FROM SalesInvoice si
+        """)
+    BigDecimal getTotalSalesAmount();
 }

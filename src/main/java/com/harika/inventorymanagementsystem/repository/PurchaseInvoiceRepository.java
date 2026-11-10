@@ -1,4 +1,3 @@
-
 package com.harika.inventorymanagementsystem.repository;
 
 import com.harika.inventorymanagementsystem.dto.SupplierOutstandingResponse;
@@ -12,6 +11,7 @@ import java.util.List;
 public interface PurchaseInvoiceRepository
         extends JpaRepository<PurchaseInvoice, Long> {
 
+    // Get supplier-wise outstanding amount.
     @Query("""
         SELECT new com.harika.inventorymanagementsystem.dto.SupplierOutstandingResponse(
             pi.supplier.partyName,
@@ -31,18 +31,28 @@ public interface PurchaseInvoiceRepository
         """)
     List<SupplierOutstandingResponse> getSupplierOutstanding();
 
-    @Query("SELECT COUNT(pi.id) FROM PurchaseInvoice pi")
+
+    // Get total number of purchase invoices.
+    @Query("""
+        SELECT COUNT(pi.id)
+        FROM PurchaseInvoice pi
+        """)
     Long getTotalPurchaseInvoiceCount();
 
+
+    // Get total purchase amount.
     @Query("""
         SELECT COALESCE(SUM(pi.totalAmount), 0)
         FROM PurchaseInvoice pi
         """)
     BigDecimal getTotalPurchaseInvoiceAmount();
 
+
+    // Get total accepted units, excluding orphan purchase items.
     @Query("""
-        SELECT COALESCE(SUM(item.quantity), 0)
+        SELECT COALESCE(SUM(COALESCE(item.receivedQuantity, 0)), 0)
         FROM PurchaseItem item
+        WHERE item.purchaseInvoice IS NOT NULL
         """)
     Long getTotalUnitsPurchased();
 }

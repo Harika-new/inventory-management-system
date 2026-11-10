@@ -21,6 +21,7 @@ public class SalesItem {
     @JoinColumn(name = "sales_invoice_id")
     private SalesInvoice salesInvoice;
 
+    @NotNull(message = "Product is required")
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;

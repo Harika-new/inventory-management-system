@@ -6,8 +6,10 @@ import com.harika.inventorymanagementsystem.dto.SupplierOutstandingResponse;
 import com.harika.inventorymanagementsystem.entity.PurchaseInvoice;
 import com.harika.inventorymanagementsystem.entity.PurchaseItem;
 import com.harika.inventorymanagementsystem.repository.PurchaseInvoiceRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -81,8 +83,11 @@ public class PurchaseInvoiceService {
         for (PurchaseItem item : purchaseInvoice.getPurchaseItems()) {
             item.setPurchaseInvoice(purchaseInvoice);
 
+//            BigDecimal itemAmount = item.getPurchasePrice()
+//                    .multiply(BigDecimal.valueOf(item.getQuantity()));
+
             BigDecimal itemAmount = item.getPurchasePrice()
-                    .multiply(BigDecimal.valueOf(item.getQuantity()));
+                    .multiply(BigDecimal.valueOf(item.getReceivedQuantity()));
 
             total = total.add(itemAmount);
 
@@ -132,9 +137,11 @@ public class PurchaseInvoiceService {
     public Optional<PurchaseInvoice> getPurchaseInvoiceById(Long id) {
         return purchaseInvoiceRepository.findById(id);
     }
-
-    // Delete Purchase Invoice by ID.
     public void deletePurchaseInvoice(Long id) {
-        purchaseInvoiceRepository.deleteById(id);
+        throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "Purchase invoices cannot be deleted. Financial history must be preserved."
+        );
+
     }
 }

@@ -6,7 +6,9 @@ import com.harika.inventorymanagementsystem.exception.InvalidPaymentException;
 import com.harika.inventorymanagementsystem.exception.SalesInvoiceNotFoundException;
 import com.harika.inventorymanagementsystem.repository.SalesInvoiceRepository;
 import com.harika.inventorymanagementsystem.repository.SalesPaymentRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -122,9 +124,10 @@ public class SalesPaymentService {
         return salesPaymentRepository.findById(id);
     }
 
-    // Delete Sales Payment by ID
     public void deleteSalesPayment(Long id) {
-
-        salesPaymentRepository.deleteById(id);
+        throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "Sales payments cannot be deleted. Payment history must be preserved."
+        );
     }
 }

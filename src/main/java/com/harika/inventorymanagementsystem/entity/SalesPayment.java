@@ -2,6 +2,7 @@ package com.harika.inventorymanagementsystem.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -19,8 +20,9 @@ public class SalesPayment {
     @JoinColumn(name = "sales_invoice_id", nullable = false)
     private SalesInvoice salesInvoice;
 
+    @NotNull(message = "Payment amount is required")
+    @Positive(message = "Payment amount must be greater than zero")
     private BigDecimal amount;
-
     @NotNull(message = "Payment date is required")
     private LocalDate paymentDate;
 

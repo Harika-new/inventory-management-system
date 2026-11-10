@@ -6,7 +6,9 @@ import com.harika.inventorymanagementsystem.exception.InvalidPaymentException;
 import com.harika.inventorymanagementsystem.exception.PurchaseInvoiceNotFoundException;
 import com.harika.inventorymanagementsystem.repository.PurchaseInvoiceRepository;
 import com.harika.inventorymanagementsystem.repository.SupplierPaymentRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -121,10 +123,10 @@ public class SupplierPaymentService {
 
         return supplierPaymentRepository.findById(id);
     }
-
-    // Delete Supplier Payment by ID
     public void deleteSupplierPayment(Long id) {
-
-        supplierPaymentRepository.deleteById(id);
+        throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "Supplier payments cannot be deleted. Payment history must be preserved."
+        );
     }
 }
